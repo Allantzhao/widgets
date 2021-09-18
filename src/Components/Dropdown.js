@@ -1,7 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const Dropdown = ({ selected, onSelectedChange, options }) => {
   const [open, setOpen] = useState(false);
+  const ref = useRef();
+
+  useEffect(() => {
+    const onBodyClick = (event) => {
+      if (ref.current.contains(event.target)) {
+        return;
+      }
+
+      setOpen(false);
+    }
+    document.body.addEventListener('click', onBodyClick, {capture : true});
+
+    return () => {
+      document.body.removeEventListener('click', onBodyClick, {capture: true});
+    }
+  }, []);
 
   const renderedOptions = options.map((option) => {
     if (option.value === selected.value) {
@@ -18,21 +34,25 @@ const Dropdown = ({ selected, onSelectedChange, options }) => {
       </div>
     );
   });
+
   return (
-    <div className="ui form">
+    <div ref={ref} className="ui form">
       <div className="field">
         <label className="label">Select a color</label>
         <div onClick={() => setOpen(!open)}
-          className={`ui selection dropdown ${open ? 'visible active' : ''}`}
+          className={`ui selection dropdown ${open ? 'active visible' : ''}`}
         >
           <i className="dropdown icon"></i>
           <div className="text">
             {selected.label}
           </div>
-          <div className={`menu ${open ? 'visible transition' : ''}`}>
+          <div className={`menu ${open ? 'transition visible' : ''}`}>
             {renderedOptions}
           </div>
         </div>
+        <p style={{color: selected.value}}>
+          The color is {selected.value}
+        </p>
       </div>
     </div>
   );
